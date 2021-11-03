@@ -1,0 +1,14 @@
+<<< define "menu" >>>
+<el-menu
+        router
+        :default-active="$route.path"
+        class="el-menu-demo"
+        mode="horizontal"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b">
+    <el-menu-item index="/config/index"><a style="padding: 20px 0 20px 0" href="/config/index">配置列表</a></el-menu-item>
+    <el-menu-item index="/config/project"><a style="padding: 20px 0 20px 0" href="/config/project">业务线列表</a></el-menu-item>
+    <el-menu-item index="/config/callback-log"><a style="padding: 20px 0 20px 0" href="/config/callback-log">回调记录列表</a></el-menu-item>
+</el-menu>
+<<< end >>>

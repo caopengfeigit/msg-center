@@ -1,0 +1,159 @@
+.el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+}
+
+body > .el-container {
+    margin-bottom: 40px;
+}
+
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+}
+
+.el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+}
+
+.login-user {
+    text-align: right;
+}
+
+.el-main {
+    padding: unset;
+}
+
+.bg-purple-dark {
+    background: #99a9bf47;
+}
+.bg-purple {
+    background: #d3dce6;
+}
+.bg-purple-light {
+    background: #e5e9f2;
+}
+.grid-content {
+    min-height: 40px;
+}
+.grid-content-option {
+    min-height: 60px;
+}
+.row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
+}
+
+.breadcrumb-text {
+    line-height: 40px;
+    padding-left: 20px;
+}
+
+.search-text {
+    padding-left: 15px;
+    margin-bottom: unset;
+    margin-top: 20px;
+}
+
+.search-input {
+    width: unset;
+    line-height: 60px;
+}
+
+.el-row-button {
+    float: right;
+    margin-right: 15px;
+    line-height: 76px;
+}
+
+.el-button {
+    line-height: 10px;
+}
+
+.cut-line {
+    width: 100%;
+    height: 0;
+    border-top: 1px solid #eee;
+}
+
+.cut-line-height {
+    width: 100%;
+    height: 20px;
+    border-top: 1px solid #eee;
+}
+
+.el-menu {
+    border-right: unset;
+}
+
+.border-left-gray {
+    border-left: solid 1px #e6e6e6;
+}
+
+.cell {
+    text-align: center;
+}
+
+.el-table th {
+    background-color: #99a9bf47;
+}
+
+.el-table tr {
+    font-size: 14px;
+    color: #606266;
+}
+
+.edit-text-color {
+    color: #409eff;
+}
+
+.el-pagination {
+    margin-top: 30px;
+    float: right;
+}
+
+.title-flag {
+    float: left;
+    font-size: 14px;
+}
+
+.el-row{
+    margin: 0 auto;
+}
+.otherCss{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+svg{
+    margin-left: 6px;
+}
+.tags, .input-nums{
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+}
+.tags .el-tag, .input-nums .el-input{
+    margin-bottom: 10px;
+}
+.el-drawer__body {
+    overflow: auto;
+}
+.el-icon-plus,.el-icon-minus{
+    line-height: revert;
+}
+#app{
+    margin: 20px 0 0 20px
+}
+.el-dialog__header {
+    border-bottom: 1px solid #ebebeb;
+}
+.form-scroll {
+    height: 500px;
+    overflow: auto;
+}
+a{
+    text-decoration:none;
+}

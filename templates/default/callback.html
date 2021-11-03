@@ -1,0 +1,168 @@
+<<< define "default/callback.html" >>>
+<html lang="en">
+<<< template "head" >>>
+<body>
+<div id="app">
+    <<< template "menu" >>>
+    <el-container>
+        <el-container>
+            <el-container>
+                <el-main>
+                    <!-- 搜索 -->
+                    <el-row>
+                        <el-col :span="24">
+                            <el-form
+                                    ref="form"
+                                    :model="form">
+                                <el-form-item class="search-text" label="回调记录搜索">
+                                    <el-input style="width:182px" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.ProjectName" placeholder="业务线标识(区分大小写)"></el-input>
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.EventKey" placeholder="事件(区分大小写)"></el-input>
+                                    <template>
+                                        <div class="search-input el-input">
+                                            <el-date-picker
+                                                    v-model="date"
+                                                    type="datetimerange"
+                                                    start-placeholder="开始日期"
+                                                    end-placeholder="结束日期"
+                                                    :default-time="['00:00:00']"
+                                                    value-format="yyyy-MM-ddTHH:mm:ssZ">
+                                            </el-date-picker>
+                                        </div>
+                                    </template>
+                                    <el-button type="primary" icon="el-icon-search" @click="searchCallbackLogs(1)">搜索</el-button>
+                                    <label style="float: right;color: red;padding-right:30px;font-size: medium">提示：回调数据只保存7天</label>
+                                </el-form-item>
+                            </el-form>
+                        </el-col>
+                    </el-row>
+
+                    <!-- 分割线 -->
+                    <div class="cut-line"></div>
+
+                    <!-- 列表数据 -->
+                    <el-table
+                            ref="multipleTable"
+                            :data="tableData"
+                            tooltip-effect="dark"
+                            style="width: 100%">
+                        <el-table-column
+                                prop="ProjectName"
+                                label="业务线">
+                        </el-table-column>
+                        <el-table-column
+                                prop="EventKey"
+                                label="事件"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                width="300"
+                                prop="RequestHost"
+                                label="回调HOST"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                prop="RequestPath"
+                                label="回调路径"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                prop="RequestStatus"
+                                label="回调状态码"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                prop="CreatedAtStr"
+                                label="回调时间"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                show-overflow-tooltip>
+                            <template slot-scope="operation">
+                                <el-link type="primary" @click="showDialog(operation.row)">查看</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+                    <!-- 分页 -->
+                    <el-pagination
+                            background
+                            layout="prev, pager, next"
+                            @current-change="currentChange"
+                            :current-page.sync="currentPage"
+                            :page-size="pageSize"
+                            :total="total">
+                    </el-pagination>
+                </el-main>
+            </el-container>
+        </el-container>
+    </el-container>
+
+    <!-- 详细数据展示框 -->
+    <el-dialog :title="title" :visible.sync="dialog">
+        <el-form class="form-scroll" :model="logData">
+            <el-form-item label="业务线" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.ProjectName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="事件" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.EventKey" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="队列名" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.QueueName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调HOST" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestHost" :readonly="true" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="回调路径" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestPath" :readonly="true" autocomplete="off" style="width:80%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调是否JSON" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestIsJson?'是':'否'" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调结果" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestRes?'成功':'失败'" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调状态码" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.RequestStatus" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调数据" :label-width="formLabelWidth">
+                <el-input
+                        :readonly="true"
+                        type="textarea"
+                        :autosize="{ minRows: 2, maxRows: 8}"
+                        v-model="logData.RequestData">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="回调错误" :label-width="formLabelWidth">
+                <el-input
+                        :readonly="true"
+                        type="textarea"
+                        :autosize="{ minRows: 2, maxRows: 8}"
+                        v-model="logData.RequestError">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="回调响应" :label-width="formLabelWidth">
+                <el-input
+                        :readonly="true"
+                        type="textarea"
+                        :autosize="{ minRows: 4, maxRows: 8}"
+                        v-model="logData.RequestResponse">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="回调时间" :label-width="formLabelWidth">
+                <el-input v-model.trim="logData.CreatedAtStr" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="closeDialog()">关 闭</el-button>
+        </div>
+    </el-dialog>
+</div>
+<<< template "footScript" >>>
+<<< template "callbackFootScript" >>>
+</body>
+</html>
+<<< end >>>

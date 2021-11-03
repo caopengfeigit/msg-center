@@ -1,0 +1,7 @@
+{
+  "name": "msgCenter",
+  "version": "1.0.0",
+  "devDependencies": {
+    "vue-router": "^3.5.2"
+  }
+}

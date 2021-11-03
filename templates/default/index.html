@@ -1,0 +1,212 @@
+<<< define "default/index.html" >>>
+<html lang="en">
+<<< template "head" >>>
+<body>
+<div id="app">
+    <<< template "menu" >>>
+    <el-container>
+        <el-container>
+            <el-container>
+                <el-main>
+                    <!-- 搜索 -->
+                    <el-row>
+                        <el-col :span="12">
+                            <el-form
+                                    ref="form"
+                                    :model="form">
+                                <el-form-item class="search-text" label="配置搜索">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.ProjectName" placeholder="业务线(区分大小写)"></el-input>
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.EventName" placeholder="事件(区分大小写)"></el-input>
+                                    <el-button type="primary" icon="el-icon-search" @click="searchConfigs(1)">搜索</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-row class="el-row-button">
+                                <el-button type="primary" @click="addConfig">添加配置</el-button>
+                                <el-button type="danger" @click="multiDelConfig">删除配置</el-button>
+                            </el-row>
+                        </el-col>
+                    </el-row>
+
+                    <!-- 分割线 -->
+                    <div class="cut-line"></div>
+
+                    <!-- 列表数据 -->
+                    <el-table
+                            ref="multipleTable"
+                            :data="tableData"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            @selection-change="handleSelectionChange">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                prop="No"
+                                label="编号">
+                        </el-table-column>
+                        <el-table-column
+                                prop="ProjectName"
+                                label="业务线">
+                        </el-table-column>
+                        <el-table-column
+                                prop="EventName"
+                                label="事件"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                prop="EventType"
+                                label="消息队列类型"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                prop="ExchangeType"
+                                label="交换器类型"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                show-overflow-tooltip>
+                            <template slot-scope="operation">
+                                <el-link type="primary" @click="showConfig(operation.row)">查看</el-link>
+                                ｜
+                                <el-link type="danger" @click="delConfig(operation.row.EventId)">删除</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+                    <!-- 分页 -->
+                    <el-pagination
+                            background
+                            layout="prev, pager, next"
+                            @current-change="currentChange"
+                            :page-size="pageSize"
+                            :total="total">
+                    </el-pagination>
+                </el-main>
+            </el-container>
+        </el-container>
+    </el-container>
+
+    <!-- single数据展示框 -->
+    <el-dialog :title="showTitle" :visible.sync="singleDialog">
+        <el-form :model="singleData">
+            <el-form-item label="业务线" :label-width="formLabelWidth">
+                <el-input v-model.trim="businessLine" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="消息队列类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="eventType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="队列名" :label-width="formLabelWidth">
+                <el-input v-model.trim="singleData.QueueName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调HOST" :label-width="formLabelWidth">
+                <el-input v-model.trim="singleData.CallbackHost" :readonly="true" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="回调接口路径" :label-width="formLabelWidth">
+                <el-input v-model.trim="singleData.CallbackPath" :readonly="true" autocomplete="off" style="width:80%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调请求类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="singleData.CallbackRequestType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="回调请求是否JSON" :label-width="formLabelWidth">
+                <el-input v-model.trim="singleData.CallbackRequestIsJson?'是':'否'" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="closeConfig(eventType)">关 闭</el-button>
+        </div>
+    </el-dialog>
+
+    <!-- workqueues数据展示框 -->
+    <el-dialog :title="showTitle" :visible.sync="workQueuesDialog">
+        <el-form class="form-scroll">
+            <el-form-item label="业务线" :label-width="formLabelWidth">
+                <el-input v-model.trim="businessLine" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="消息队列类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="eventType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <div v-for="config in workQueuesConfigList">
+                <!-- 分割线 -->
+                <div class="cut-line-height"></div>
+                <el-form-item label="队列名" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.QueueName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调HOST" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackHost" :readonly="true" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="回调接口路径" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackPath" :readonly="true" autocomplete="off" style="width:80%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调请求类型" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackRequestType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调请求是否JSON" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackRequestIsJson?'是':'否'" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="closeConfig(eventType)">关 闭</el-button>
+        </div>
+    </el-dialog>
+
+    <!-- publishsubscribe数据展示框 -->
+    <el-dialog :title="showTitle" :visible.sync="publishSubscribeDialog">
+        <el-form class="form-scroll">
+            <el-form-item label="业务线" :label-width="formLabelWidth">
+                <el-input v-model.trim="businessLine" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="消息队列类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="eventType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="交换器类型" :label-width="formLabelWidth">
+                <el-input v-model.trim="exchangeType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <div v-for="config in publishSubscribeConfigList">
+                <!-- 分割线 -->
+                <div class="cut-line-height"></div>
+                <el-form-item label="队列名" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.QueueName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="交换器名(exchange)" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.ExchangeName" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="路径(routing)" :label-width="formLabelWidth" v-if="config.RoutingKey">
+                    <el-input v-model.trim="config.RoutingKey" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <div v-if="config.Headers" v-for="(val, key) in config.Headers">
+                    <el-form-item label="headers：key-value" :label-width="formLabelWidth">
+                        <el-input v-model.trim="key+' - '+config.Headers[key]" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                    </el-form-item>
+                </div>
+                <el-form-item label="x-match" :label-width="formLabelWidth" v-if="config.XMatch">
+                    <el-input v-model.trim="config.XMatch" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调HOST" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackHost" :readonly="true" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="回调接口路径" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackPath" :readonly="true" autocomplete="off" style="width:80%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调请求类型" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackRequestType" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+                <el-form-item label="回调请求是否JSON" :label-width="formLabelWidth">
+                    <el-input v-model.trim="config.CallbackRequestIsJson?'是':'否'" :readonly="true" autocomplete="off" style="width:50%"></el-input>
+                </el-form-item>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="closeConfig(eventType)">关 闭</el-button>
+        </div>
+    </el-dialog>
+</div>
+<<< template "footScript" >>>
+<<< template "indexFootScript" >>>
+</body>
+</html>
+<<< end >>>

@@ -1,0 +1,120 @@
+<<< define "default/project.html" >>>
+<html lang="en">
+<<< template "head" >>>
+<body>
+<div id="app">
+    <<< template "menu" >>>
+    <el-container>
+        <el-container>
+            <el-container>
+                <el-main>
+                    <!-- 搜索 -->
+                    <el-row>
+                        <el-col :span="12">
+                            <el-form
+                                    ref="form"
+                                    :model="form">
+                                <el-form-item class="search-text" label="业务线搜索">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.Name" placeholder="标识(区分大小写)"></el-input>
+                                    <el-input class="search-input" v-model="form.BusinessLine" placeholder="业务线"></el-input>
+                                    <el-button type="primary" icon="el-icon-search" @click="searchProjects(1)">搜索</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-row class="el-row-button">
+                                <el-button type="primary"@click="showProjectDialog()">添加业务线</el-button>
+                                <el-button type="danger" @click="multiDelProject">删除业务线</el-button>
+                            </el-row>
+                        </el-col>
+                    </el-row>
+
+                    <!-- 分割线 -->
+                    <div class="cut-line"></div>
+
+                    <!-- 列表数据 -->
+                    <el-table
+                            ref="multipleTable"
+                            :data="tableData"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            @selection-change="handleSelectionChange">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                prop="No"
+                                label="编号">
+                        </el-table-column>
+                        <el-table-column
+                                prop="Name"
+                                label="标识">
+                        </el-table-column>
+                        <el-table-column
+                                prop="BusinessLine"
+                                label="业务线"
+                                show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                show-overflow-tooltip>
+                            <template slot-scope="operation">
+                                <el-link type="primary" @click="showEditProjectDialog(operation.row.Id, operation.row.Name, operation.row.BusinessLine)">编辑</el-link>
+                                ｜
+                                <el-link type="danger" @click="delProject(operation.row.Id)">删除</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+                    <!-- 分页 -->
+                    <el-pagination
+                            background
+                            layout="prev, pager, next"
+                            @current-change="currentChange"
+                            :page-size="pageSize"
+                            :total="total">
+                    </el-pagination>
+                </el-main>
+            </el-container>
+        </el-container>
+    </el-container>
+
+    <!-- 添加业务线对话框 -->
+    <el-dialog :title="addTableName" :visible.sync="dialog">
+        <el-form :model="addForm">
+            <el-form-item label="标识" :label-width="formLabelWidth" :required="true">
+                <el-input v-model.trim="addForm.name" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" placeholder="区分大小写" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="业务线" :label-width="formLabelWidth" :required="true">
+                <el-input v-model.trim="addForm.business_line" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="closeDialog()">取 消</el-button>
+            <el-button type="primary" @click="addProject()">确 定</el-button>
+        </div>
+    </el-dialog>
+
+    <!-- 编辑业务线对话框 -->
+    <el-dialog :title="editTableName" :visible.sync="editDialog">
+        <el-form :model="editForm">
+            <el-input type="hidden" v-model="editForm.id"></el-input>
+            <el-form-item label="标识" :label-width="formLabelWidth" :required="true">
+                <el-input v-model.trim="editForm.name" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" placeholder="区分大小写" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+            <el-form-item label="业务线" :label-width="formLabelWidth" :required="true">
+                <el-input v-model.trim="editForm.business_line" autocomplete="off" style="width:50%"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="editDialog=false">取 消</el-button>
+            <el-button type="primary" @click="editProject()">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+<<< template "footScript" >>>
+<<< template "projectFootScript" >>>
+</body>
+</html>
+<<< end >>>

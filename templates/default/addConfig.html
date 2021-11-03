@@ -1,0 +1,349 @@
+<<< define "default/addConfig.html" >>>
+<html lang="en">
+<<< template "head" >>>
+<body>
+<div id="app">
+    <<< template "menu" >>>
+    <el-container>
+        <el-main>
+            <!--业务线-->
+            <el-row>
+                <el-col :span="12">
+                    <el-form
+                            ref="form"
+                            :model="form">
+                        <el-form-item :required="true" class="search-text" label="业务线">
+                            <el-input style="width:auto" type="hidden" v-model="form.projectId"></el-input>
+                            <el-input style="width:182px" class="search-input" @blur="searchProject" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.projectName" placeholder="业务线标识(区分大小写)"></el-input>
+                            <el-input class="search-input" :disabled="true" v-model.trim="form.businessLine"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+            </el-row>
+
+            <!--事件名-->
+            <el-row>
+                <el-col :span="12">
+                    <el-form
+                            ref="form"
+                            :model="form">
+                        <el-form-item :required="true" class="search-text" label="事件">
+                            <el-input class="search-input" @blur="searchEvent" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.eventName" placeholder="事件(区分大小写)"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+            </el-row>
+
+            <!--选择消息队列类型-->
+            <el-row>
+                <el-col :span="12">
+                    <el-form
+                            ref="form"
+                            :model="form">
+                        <el-form-item :required="true" class="search-text" label="消息队列类型">
+                            <el-radio-group v-model="form.eventType" @change="changeType">
+                                <el-radio v-for="(type, index) in eventType" :key="index" :label="type" border>
+                                    {{type}}
+                                </el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+            </el-row>
+
+            <!--图片解释-->
+            <el-row>
+                <el-col :span="12">
+                    <div style="height: fit-content" class="block">
+                        <el-image :src="imgSrc"></el-image>
+                    </div>
+                </el-col>
+            </el-row>
+
+            <!--single配置项-->
+            <div v-show="showSingle">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form
+                                ref="form"
+                                :model="form">
+                            <el-form-item :required="true" class="search-text" label="队列名">
+                                <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.queueName" placeholder="队列名"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调HOST">
+                                <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackHost" placeholder="http://example.com"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调路径">
+                                <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackPath" placeholder="/api/example"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                <el-radio-group v-model="form.callbackRequestType">
+                                    <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                        {{type}}
+                                    </el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调请求是否JSON">
+                                <el-radio v-model="form.callbackRequestIsJson" :label="false">否</el-radio>
+                                <el-radio v-model="form.callbackRequestIsJson" :label="true">是</el-radio>
+                            </el-form-item>
+                        </el-form>
+                    </el-col>
+                </el-row>
+            </div>
+
+            <!--workQueues配置项-->
+            <div v-show="showWorkqueues">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form
+                                ref="form"
+                                :model="form">
+                            <el-form-item :required="true" class="search-text" label="消费者个数">
+                                <el-input-number v-model="form.workQueuesNum" :min="2" :max="5" label="消费者个数"></el-input-number>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="队列名">
+                                <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.queueName" placeholder="队列名"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调HOST">
+                                <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackHost" placeholder="http://example.com"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调路径">
+                                <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackPath" placeholder="/api/example"></el-input>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                <el-radio-group v-model="form.callbackRequestType">
+                                    <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                        {{type}}
+                                    </el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item :required="true" class="search-text" label="回调请求是否JSON">
+                                <el-radio v-model="form.callbackRequestIsJson" :label="false">否</el-radio>
+                                <el-radio v-model="form.callbackRequestIsJson" :label="true">是</el-radio>
+                            </el-form-item>
+                        </el-form>
+                    </el-col>
+                </el-row>
+            </div>
+
+            <!--publishSubscribe配置项-->
+            <div v-show="showPublishSubscribe">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form
+                                ref="form"
+                                :model="form">
+                            <el-form-item style="width:100%" :required="true" class="search-text" label="交换器类型">
+                                <el-radio-group @change="changeExchangeType" v-model="form.exchangeType">
+                                    <el-radio style="line-height: 40px" v-for="(type, index) in exchangeType" :key="index" :label="index">
+                                        {{type}}
+                                    </el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+
+                            <!--direct-->
+                            <div v-show="showDirect">
+                                <el-form-item :required="true" class="search-text" label="交换器名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.exchangeName" placeholder="exchange"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="路径">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.routingKey" placeholder="routing key"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="队列名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.queueName" placeholder="queue name"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调HOST">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackHost" placeholder="http://example.com"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调路径">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackPath" placeholder="/api/example"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                    <el-radio-group v-model="form.callbackRequestType">
+                                        <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                            {{type}}
+                                        </el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求是否JSON">
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="false">否</el-radio>
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="true">是</el-radio>
+                                </el-form-item>
+                            </div>
+
+                            <!--fanout-->
+                            <div v-show="showFanout">
+                                <el-form-item :required="true" class="search-text" label="交换器名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.exchangeName" placeholder="exchange"></el-input>
+                                </el-form-item>
+
+                                <!-- 分割线 -->
+                                <div style="margin-top:10px" class="cut-line"></div>
+
+                                <div v-for="(item, index) in form.fanoutConfigs" :key="index">
+                                    <el-button style="float: right" @click="delFanoutConfig(index)" type="danger" icon="el-icon-delete" circle></el-button>
+                                    <el-form-item style="width:80%" :required="true" class="search-text" label="队列名">
+                                        <el-input @blur="checkFanoutQueueName(index)" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.queueName" placeholder="queue name"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调HOST">
+                                        <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.callbackHost" placeholder="http://example.com"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调路径">
+                                        <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.callbackPath" placeholder="/api/example"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                        <el-radio-group v-model="item.callbackRequestType">
+                                            <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                                {{type}}
+                                            </el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                    <el-form-item style="width: 80%" :required="true" class="search-text" label="回调请求是否JSON">
+                                        <el-radio v-model="item.callbackRequestIsJson" :label="false">否</el-radio>
+                                        <el-radio v-model="item.callbackRequestIsJson" :label="true">是</el-radio>
+                                    </el-form-item>
+                                    <!-- 分割线 -->
+                                    <div class="cut-line"></div>
+                                </div>
+                                <el-button style="float: right; margin-top: -40px;" @click="addFanoutConfig" type="primary" icon="el-icon-edit" circle></el-button>
+                            </div>
+
+                            <!--headers-->
+                            <div v-show="showHeaders">
+                                <el-form-item :required="true" class="search-text" label="交换器名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.exchangeName" placeholder="exchange"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="队列名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.queueName" placeholder="queue name"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="headers匹配规则">
+                                    <el-radio-group v-model="form.xMatch">
+                                        <el-radio style="line-height: 40px" v-for="(rule, index) in xMatch" :key="index" :label="rule">
+                                            {{rule}}
+                                        </el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+
+                                <!-- 分割线 -->
+                                <div style="margin-top:10px" class="cut-line"></div>
+
+                                <div v-for="(item, index) in form.headers" :key="index">
+                                    <el-button style="float: right; margin-right:50px" @click="delHeader(index)" type="danger" icon="el-icon-delete" circle></el-button>
+                                    <el-form-item style="width:80%" :required="true" class="search-text" label="headers匹配">
+                                        <el-input class="search-input" @blur="checkHeadersKey(index)" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.key" placeholder="key"></el-input>
+                                        <el-input class="search-input" v-model.trim="item.value" placeholder="value"></el-input>
+                                    </el-form-item>
+
+                                    <!-- 分割线 -->
+                                    <div style="margin-top: 20px" class="cut-line"></div>
+                                </div>
+                                <el-button style="float: right; margin-top: -60px;" @click="addHeader" type="primary" icon="el-icon-edit" circle></el-button>
+
+                                <el-form-item :required="true" class="search-text" label="回调HOST">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackHost" placeholder="http://example.com"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调路径">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackPath" placeholder="/api/example"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                    <el-radio-group v-model="form.callbackRequestType">
+                                        <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                            {{type}}
+                                        </el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求是否JSON">
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="false">否</el-radio>
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="true">是</el-radio>
+                                </el-form-item>
+                            </div>
+
+                            <!--topic-->
+                            <div v-show="showTopic">
+                                <el-form-item :required="true" class="search-text" label="交换器名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.exchangeName" placeholder="exchange"></el-input>
+                                </el-form-item>
+
+                                <!-- 分割线 -->
+                                <div style="margin-top:10px" class="cut-line"></div>
+
+                                <div v-for="(item, index) in form.topic" :key="index">
+                                    <el-button style="float: right" @click="delTopicConfig(index)" type="danger" icon="el-icon-delete" circle></el-button>
+                                    <el-form-item style="width:80%" :required="true" class="search-text" label="路径名">
+                                        <el-input @blur="checkTopicRoutingKey(index)" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.routingKey" placeholder="routing key(通配符)"></el-input>
+                                    </el-form-item>
+                                    <el-form-item style="width:50%" :required="true" class="search-text" label="队列名">
+                                        <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.queueName" placeholder="queue name"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调HOST">
+                                        <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.callbackHost" placeholder="http://example.com"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调路径">
+                                        <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="item.callbackPath" placeholder="/api/example"></el-input>
+                                    </el-form-item>
+                                    <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                        <el-radio-group v-model="item.callbackRequestType">
+                                            <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                                {{type}}
+                                            </el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                    <el-form-item style="width: 80%" :required="true" class="search-text" label="回调请求是否JSON">
+                                        <el-radio v-model="item.callbackRequestIsJson" :label="false">否</el-radio>
+                                        <el-radio v-model="item.callbackRequestIsJson" :label="true">是</el-radio>
+                                    </el-form-item>
+                                    <!-- 分割线 -->
+                                    <div class="cut-line"></div>
+                                </div>
+                                <el-button style="float: right; margin-top: -40px;" @click="addTopicConfig" type="primary" icon="el-icon-edit" circle></el-button>
+                            </div>
+
+                            <!--x-delayed-message-->
+                            <div v-show="showXDelayedMessage">
+                                <el-form-item :required="true" class="search-text" label="交换器名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.exchangeName" placeholder="exchange"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="路径">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.routingKey" placeholder="routing key"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="队列名">
+                                    <el-input class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.queueName" placeholder="queue name"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调HOST">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackHost" placeholder="http://example.com"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调路径">
+                                    <el-input style="width:50%" class="search-input" onkeyup="this.value=this.value.replace(/[\u4E00-\u9FA5]/g,'')" v-model.trim="form.callbackPath" placeholder="/api/example"></el-input>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求方式">
+                                    <el-radio-group v-model="form.callbackRequestType">
+                                        <el-radio style="line-height: 40px" v-for="(type, index) in callbackRequestType" :key="index" :label="type">
+                                            {{type}}
+                                        </el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item :required="true" class="search-text" label="回调请求是否JSON">
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="false">否</el-radio>
+                                    <el-radio v-model="form.callbackRequestIsJson" :label="true">是</el-radio>
+                                </el-form-item>
+                            </div>
+
+                        </el-form>
+                    </el-col>
+                </el-row>
+            </div>
+
+            <el-row style="margin-bottom: 50px">
+                <el-col :span="12">
+                    <el-button type="primary" @click="onSubmit">提交</el-button>
+                </el-col>
+            </el-row>
+        </el-main>
+    </el-container>
+</div>
+<<< template "footScript" >>>
+<<< template "addConfigFootScript" >>>
+</body>
+</html>
+<<< end >>>
