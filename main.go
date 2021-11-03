@@ -33,7 +33,7 @@ func main() {
 	go console.WorkQueuesConsume(eventId)
 	//publish subscribe消息队列启动
 	go console.PublishSubscribeConsume(eventId)
-	err := r.Run(":9501") // listen and serve on 0.0.0.0:9501
+	err := r.Run(":9510") // listen and serve on 0.0.0.0:9510
 	if err != nil {
 		panic(err)
 	}
