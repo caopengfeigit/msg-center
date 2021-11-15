@@ -9,7 +9,7 @@
 ### 项目实现目的
 - 学习golang、vue，初学golang，想用一个实际的项目去更深入的学习和使用。
 - 在平时的项目开发中，难免遇到解耦、异步处理，由于业务线众多，每个业务线使用的开发语言也不同，如果每个项目都有自己的一套消息队列，不光重复造轮子浪费时间，同时也不好进行维护。
-于是基于次想法，开发了一套可配置化、维护成本低的消息系统。
+于是基于此想法，开发了一套可配置化、维护成本低的消息系统。
 ### 项目流程
 ![process 流程](public/img/process.jpg)
 ### 项目实现特点
@@ -19,12 +19,12 @@
 ### 项目缺陷
 - 项目并没有做权限限制，所有的用户都可以访问并增删配置，并调用接口发送消息。
 - 现所有接口没有做参数加密。
-- 该系统异步解耦只是通过请求 http 接口实现
+- 该系统异步解耦只是通过请求 http 接口实现。
 - 初用golang、vue，代码写的很烂。欢迎大佬的指指点点！
 ### 系统使用介绍
 所有功能的实现都是基于 [rabbitmq](https://www.rabbitmq.com/tutorials/tutorial-one-go.html) 官方文档去实现的。如果不是很了解rabbitmq的话，建议去看看文档了解一下。
 #### 项目运行条件
-- 服务器要安装rabbitmq、mongodb、golang（不执行编译文件）服务
+- 服务器要安装rabbitmq、mongodb、golang（不执行编译文件）服务。
 - 在项目根目录下的config文件夹中有 msgCenterDb.js 文件，该文件中包含了mongodb数据库的collection结构以及测试数据，自行初始化到数据库。
 - 延时队列需要用到 rabbitmq 的 rabbitmq_delayed_message_exchange 插件，请自行到 [rabbitmq官方插件](https://www.rabbitmq.com/community-plugins.html) 处进行下载并安装。
 #### 项目运行演示
