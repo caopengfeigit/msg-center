@@ -45,7 +45,7 @@
 | headers | string | 否 | 只有在发布订阅(PublishSubscribe)消息队列类型下，且交换器类型为headers时必传 | {"key1":"value1","key3":"abcde"} | headers模式下的匹配key-value，数据格式为json |
 
 请求示例：  
-http://localhost:9501/publish-message?configKey=test.test3&message=123&delayTime=10  
+http://localhost:9510/publish-message?configKey=test.test3&message=123&delayTime=10  
 我们在 14:08:30 发送一条延时消息，发送成功之后，过10秒钟去回调对应的配置接口。我们可以在系统的回调记录列表后台查看该条消息的消费情况。  
 ![callbacklist 回调列表](public/img/callbackList.jpg)  
 我们可以看到，该条消息在 14:08:40 秒进行了回调。
